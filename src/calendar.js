@@ -96,7 +96,9 @@ async function findExisting(cal, item) {
   );
   const numbers = item.title.match(/\d+/g) ?? [];
   const sameNumber = matches.find((event) => numbers.some((n) => new RegExp(`\\b${n}\\b`).test(event.summary.slice(item.course.length))));
-  const event = sameNumber ?? (matches.length === 1 ? matches[0] : null);
+  // Several things can be due at once ("Sect-13.3" and "Sect-13.4"), so an exact name wins.
+  const sameName = matches.find((event) => squash(event.summary).includes(squash(item.title)));
+  const event = sameName ?? sameNumber ?? (matches.length === 1 ? matches[0] : null);
   return event && { event, adopted: true };
 }
 
