@@ -12,32 +12,67 @@ export function openBrowser({ headless = false } = {}) {
   });
 }
 
-const USER_FIELD =
-  'input[type=email], input[name=loginfmt], input[autocomplete=username], ' +
-  'input[name*=user i], input[id*=user i], input[name*=email i], input[id*=email i]';
+const NOT_TEXT = ':not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=submit]):not([type=button])';
+const USER_FIELD = [
+  'input[type=email]',
+  'input[name=loginfmt]',
+  'input[autocomplete=username]',
+  'input[name*=user i]',
+  'input[id*=user i]',
+  'input[name*=email i]',
+  'input[id*=email i]',
+]
+  .map((selector) => selector + NOT_TEXT)
+  .join(', ');
+
+// Playwright's "visible" is not enough: Microsoft parks a 10px password field
+// in the corner of its email page. Only fields a person could click count.
+async function shown(locator) {
+  const elements = [];
+  for (const element of await locator.filter({ visible: true }).all()) {
+    const box = await element.boundingBox();
+    if (box && box.width >= 40 && box.height >= 15 && box.x >= 0 && box.y >= 0) elements.push(element);
+  }
+  return elements;
+}
+
+// Clicks the form's submit button when there is exactly one; some sign-in
+// pages ignore the Enter key.
+async function submit(frame, field) {
+  const buttons = await shown(frame.locator('button[type=submit], input[type=submit]'));
+  if (buttons.length === 1) await buttons[0].click();
+  else await field.press('Enter');
+}
 
 // Fills a login form if the frame shows one. Each host gets one attempt per
 // field, so a wrong password can never loop into an account lockout.
 async function fillLogin(frame, creds, attempted) {
   const host = new URL(frame.url()).host;
-  const visible = (selector) => frame.locator(selector).filter({ visible: true });
-  const password = visible('input[type=password]');
-  const user = visible(USER_FIELD).first();
-  const passwordFields = await password.count();
+  const passwords = await shown(frame.locator('input[type=password]'));
+  const [user] = await shown(frame.locator(USER_FIELD));
 
   // Exactly one password field means a sign-in form; two means a sign-up form.
-  if (passwordFields === 1 && !attempted.has(`${host}:password`)) {
+  if (passwords.length === 1 && !attempted.has(`${host}:password`)) {
+    if (user && !(await user.inputValue())) await user.fill(creds.user);
+    await passwords[0].fill(creds.password);
+    await submit(frame, passwords[0]);
     attempted.add(`${host}:password`);
-    if ((await user.count()) && !(await user.inputValue())) await user.fill(creds.user);
-    await password.fill(creds.password);
-    await password.press('Enter');
     return true;
   }
-  if (passwordFields === 0 && (await user.count()) && !attempted.has(`${host}:user`)) {
-    attempted.add(`${host}:user`);
+  if (!passwords.length && user && !attempted.has(`${host}:user`)) {
     await user.fill(creds.user);
-    await user.press('Enter');
+    await submit(frame, user);
+    attempted.add(`${host}:user`);
     return true;
+  }
+  // Microsoft's "Stay signed in?" page: say yes, so the session outlives this run.
+  if (/^login.(microsoftonline|microsoft|live).com$/.test(host) && !attempted.has(`${host}:stay`)) {
+    const prompt = frame.locator('#KmsiDescription, #KmsiCheckboxField').or(frame.getByText('Stay signed in?'));
+    if (await prompt.count()) {
+      await frame.locator('#idSIButton9, [data-testid=primaryButton]').first().click();
+      attempted.add(`${host}:stay`);
+      return true;
+    }
   }
   return false;
 }
