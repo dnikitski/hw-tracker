@@ -10,6 +10,7 @@ import { itemLine, post } from './discord.js';
 import { when, writeNote } from './note.js';
 import { loadSecrets } from './secrets.js';
 import { brightspace } from './sites/brightspace.js';
+import { canvas } from './sites/canvas.js';
 import { page } from './sites/page.js';
 import { loadState, merge, saveState } from './store.js';
 
@@ -41,9 +42,11 @@ for (const [name, site] of Object.entries(config.sites)) {
   // An unverified site is only ever scraped by `npm run check`, never synced.
   if (!dryRun && !site.verified) continue;
   try {
-    const items = site.type === 'brightspace' ? await brightspace(site, ctx) : await page(name, site, ctx);
+    const scrape = { brightspace: () => brightspace(site, ctx), canvas: () => canvas(name, site, ctx), page: () => page(name, site, ctx) }[site.type];
+    if (!scrape) throw new Error(`unknown site type "${site.type}"`);
+    const items = await scrape();
     log(`${name}: ${items.length} item(s)${site.verified ? '' : ' (not verified, will not be synced)'}`);
-    if (dryRun) console.table(items.map((item) => ({ course: item.course, title: item.title, due: when({ ...item, due: item.due.toISOString() }) })));
+    if (dryRun) console.table(items.map((item) => ({ course: item.course, title: item.title, due: when({ ...item, due: item.due.toISOString() }), done: item.done ?? '' })));
     if (site.verified) found.push(...items);
   } catch (error) {
     errors.push(`${name}: ${error.message}`);

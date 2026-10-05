@@ -39,6 +39,8 @@ export function merge(state, found, now) {
       if (known.due !== fresh.due) changed.push({ item: known, was: known.due });
       Object.assign(known, fresh, { url: scraped.url ?? known.url });
     }
+    // A site that reports submissions can tick an item; it never unticks one done by hand.
+    if (scraped.done) state.items[id].done = true;
     state.items[id].lastSeen = now.toISOString();
   }
   return { added, changed };

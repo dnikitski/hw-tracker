@@ -8,7 +8,7 @@ Homework lives in too many places: the LMS, plus a different publisher site for 
 
 It runs on a schedule on any Windows machine that stays on.
 
-> **Status:** early. Brightspace (through Microsoft sign-in) and WebAssign are working against real accounts; WileyPLUS and Connect are configured but untested. Every site still has to pass your own check before it is trusted (see [Check, then trust](#check-then-trust)).
+> **Status:** early. Brightspace (through Microsoft sign-in), WebAssign and WileyPLUS are working against real accounts; Connect is configured but untested. Every site still has to pass your own check before it is trusted (see [Check, then trust](#check-then-trust)).
 
 ## How it works
 
@@ -20,7 +20,8 @@ Connect ─────┘   -> state.json        └─> Discord webhook
 ```
 
 - **Brightspace** is read through its own REST API using the signed-in browser session, so no API key or admin access is needed. If your school exposes the calendar feed (Calendar > Subscribe), paste that URL into `icalUrl` instead and no browser is used at all.
-- **Publisher sites** (WebAssign, WileyPLUS, McGraw Hill Connect, or anything else with a list of assignments) share one generic reader: it finds every row on the page that pairs a name with a date. A site is described in `config.json`, not in code.
+- **Canvas**, and sites built on it such as the new WileyPLUS, are read the same way through Canvas's REST API (`"type": "canvas"`). This is the one reader that also knows what you have already submitted.
+- **Other publisher sites** (WebAssign, McGraw Hill Connect, or anything else with a list of assignments) share one generic reader (`"type": "page"`): it finds every row on the page that pairs a name with a date. A site is described in `config.json`, not in code.
 - **Logins** are typed in by the program. Passwords are stored encrypted with Windows DPAPI, so `secrets.json` can only be read by your Windows account on that machine. A persistent browser profile keeps cookies, so an MFA "remember this device" prompt is answered once.
 - **State** is one JSON file. Each assignment has a stable id, so a re-run updates instead of duplicating.
 
@@ -78,6 +79,7 @@ npm run sync                    # one real pass
 |---|---|
 | `sites.<name>.enabled` | Scrape this site at all |
 | `sites.<name>.verified` | Allow it to be synced; leave `false` until `npm run check` looks right |
+| `sites.<name>.type` | `brightspace`, `canvas` or `page` (the generic reader) |
 | `sites.brightspace.host` | Your school's Brightspace address |
 | `sites.brightspace.icalUrl` | Optional calendar feed URL; used instead of logging in |
 | `course` | Label put on every assignment from this site, e.g. `PHY 203` |
@@ -85,7 +87,7 @@ npm run sync                    # one real pass
 | `startUrl` | Where to begin. For a site opened from Brightspace, right-click the link in your course and copy its address |
 | `viaBrightspace` | Sign into Brightspace first, then open `startUrl` |
 | `readyUrl` | Regex that matches the address once you are in and looking at assignments |
-| `hops` | Optional links to click when sign-in lands somewhere else first, e.g. Cengage's dashboard: `[{ "url": "cengage\.com/dashboard", "click": "a[href*='webassign']" }]` |
+| `hops` | Optional links to click when sign-in lands somewhere else first, e.g. Cengage's dashboard: `[{ "url": "cengage\\.com/dashboard", "click": "a[href*='webassign']" }]` |
 | `steps` | Optional selectors to click after that, e.g. `["text=Assignments"]` |
 | `scope` | Optional CSS selector; only rows inside it are read, e.g. `"main"` or `"#assignments"` |
 | `ignore` | Optional regex; rows whose name matches are dropped, e.g. `"copyright|announcement"` |
@@ -95,7 +97,7 @@ npm run sync                    # one real pass
 
 ## Good to know
 
-- **Completion is manual for now.** The tool knows when something is due, not whether you submitted it. Tick the box in the note and it stays ticked.
+- **Completion is mostly manual.** Canvas-type sites report submissions, so those tick themselves. Everywhere else the tool knows when something is due, not whether you submitted it: tick the box in the note and it stays ticked.
 - **Calendar events are never deleted.** If you delete one yourself, the tool leaves it deleted. If you already added an event by hand for the same class and deadline, the tool adopts it instead of making a second one.
 - **Sites change.** When a redesign breaks a reader you get a Discord warning; `npm run check` shows what it sees now.
 - **Terms of service.** This automates your own account to read your own due dates, a few times a day. Some sites' terms restrict automated access; that call is yours.
@@ -111,7 +113,7 @@ Tests cover the date/row parser, calendar titles, course-code extraction and sta
 
 ## Roadmap
 
-- Read submitted/graded status from each site so finished work ticks itself
+- Read submitted/graded status from Brightspace and WebAssign too, so all finished work ticks itself
 - Site-specific readers where the generic one is not enough
 - macOS and Linux secret storage
 

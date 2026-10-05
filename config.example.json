@@ -16,10 +16,10 @@
       "course": "PHYS 101",
       "login": "cengage",
       "startUrl": "https://www.webassign.net/wa-auth/login",
-      "readyUrl": "webassign.net/(web/Student|v4cgi/student.pl)",
+      "readyUrl": "webassign\\.net/(web/Student|v4cgi/student\\.pl)",
       "hops": [
         {
-          "url": "cengage.com/dashboard",
+          "url": "cengage\\.com/dashboard",
           "click": "a[data-testid='home-page-launch-course-link'][href*='webassign']"
         }
       ],
@@ -27,15 +27,18 @@
       "steps": []
     },
     "wileyplus": {
-      "type": "page",
+      "type": "canvas",
       "enabled": false,
       "verified": false,
-      "course": "MATH 201",
       "login": "wiley",
-      "viaBrightspace": true,
-      "startUrl": "PASTE the Brightspace link that opens WileyPLUS",
-      "readyUrl": "education\\.wiley\\.com",
-      "steps": []
+      "startUrl": "https://education.wiley.com/",
+      "readyUrl": "learn\\.wileyplus\\.com/courses/\\d+",
+      "hops": [
+        {
+          "url": "education\\.wiley\\.com/.*StudentDashboard",
+          "click": "a[data-testid='course-card__course-section-link']"
+        }
+      ]
     },
     "connect": {
       "type": "page",

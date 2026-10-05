@@ -81,3 +81,12 @@ test('merge reports new and moved items and keeps one entry per assignment', () 
   assert.equal(Object.keys(state.items).length, 1);
   assert.equal(state.items[idFor(hw)].due, moved.due.toISOString());
 });
+
+test('a site reporting a submission ticks the item, and a later run never unticks it', () => {
+  const state = { items: {} };
+  const hw = { source: 'wileyplus', key: '42', course: 'MTH 243', title: 'Sect-13.3', due: new Date(2026, 9, 9, 23), allDay: false, url: null };
+  merge(state, [{ ...hw, done: true }], now);
+  assert.equal(state.items[idFor(hw)].done, true);
+  merge(state, [{ ...hw, done: false }], now);
+  assert.equal(state.items[idFor(hw)].done, true);
+});
