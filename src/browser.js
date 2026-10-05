@@ -78,14 +78,24 @@ async function fillLogin(frame, creds, attempted) {
 }
 
 // Waits until some tab satisfies `ready`, typing credentials into any login
-// form that shows up on the way. Anything it cannot handle (an MFA push, a
-// captcha) can be finished by hand in the open window before the timeout.
-export async function reach(context, { ready, creds, what, timeoutMs = 180_000 }) {
+// form that shows up on the way. `hops` are links to click when a sign-in
+// lands somewhere else first, e.g. a publisher dashboard: [{ url, click }].
+// Anything it cannot handle (an MFA push, a captcha) can be finished by hand
+// in the open window before the timeout.
+export async function reach(context, { ready, creds, what, hops = [], timeoutMs = 180_000 }) {
   const attempted = new Set();
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     for (const page of context.pages()) {
       if (await ready(page).catch(() => false)) return page;
+      for (const hop of hops) {
+        const link = page.locator(hop.click).first();
+        if (attempted.has(`hop:${hop.click}`) || !new RegExp(hop.url, 'i').test(page.url())) continue;
+        if (await link.isVisible().catch(() => false)) {
+          attempted.add(`hop:${hop.click}`);
+          await link.click().catch(() => {});
+        }
+      }
       if (!creds) continue;
       for (const frame of page.frames()) {
         if (await fillLogin(frame, creds, attempted).catch(() => false)) break;
@@ -93,9 +103,10 @@ export async function reach(context, { ready, creds, what, timeoutMs = 180_000 }
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }
+  const stuck = context.pages().map((page) => page.url().split('?')[0]).join(', ');
   throw new Error(
-    `${what}: not signed in after ${timeoutMs / 1000}s. A login or MFA prompt probably needs a human; ` +
-      'run "npm run check" and finish it in the browser window.',
+    `${what}: not signed in after ${timeoutMs / 1000}s (stuck at ${stuck}). A login or MFA prompt probably ` +
+      'needs a human; run "npm run check" and finish it in the browser window.',
   );
 }
 

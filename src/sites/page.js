@@ -108,6 +108,7 @@ export async function page(name, site, ctx) {
   const target = await reach(context, {
     what: name,
     creds: ctx.secrets.logins?.[site.login],
+    hops: site.hops,
     ready: async (p) => p.frames().some((frame) => readyUrl.test(frame.url())),
   });
   const settle = () => target.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {});

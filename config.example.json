@@ -16,7 +16,14 @@
       "course": "PHYS 101",
       "login": "cengage",
       "startUrl": "https://www.webassign.net/wa-auth/login",
-      "readyUrl": "webassign\\.net/(web|v4cgi)/",
+      "readyUrl": "webassign.net/(web/Student|v4cgi/student.pl)",
+      "hops": [
+        {
+          "url": "cengage.com/dashboard",
+          "click": "a[data-testid='home-page-launch-course-link'][href*='webassign']"
+        }
+      ],
+      "scope": "#js-student-myAssignmentsWrapper",
       "steps": []
     },
     "wileyplus": {
@@ -50,7 +57,10 @@
     "calendarId": "primary",
     "colorId": "5",
     "blockMinutes": 30,
-    "reminderMinutes": [1440, 180]
+    "reminderMinutes": [
+      1440,
+      180
+    ]
   },
   "discord": {
     "digestHour": 8,

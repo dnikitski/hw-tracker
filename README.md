@@ -8,7 +8,7 @@ Homework lives in too many places: the LMS, plus a different publisher site for 
 
 It runs on a schedule on any Windows machine that stays on.
 
-> **Status:** early. The Brightspace reader and the generic page reader work against saved test rows, but each site still has to be checked against a real account before it is trusted (see [Check, then trust](#check-then-trust)).
+> **Status:** early. Brightspace (through Microsoft sign-in) and WebAssign are working against real accounts; WileyPLUS and Connect are configured but untested. Every site still has to pass your own check before it is trusted (see [Check, then trust](#check-then-trust)).
 
 ## How it works
 
@@ -85,6 +85,7 @@ npm run sync                    # one real pass
 | `startUrl` | Where to begin. For a site opened from Brightspace, right-click the link in your course and copy its address |
 | `viaBrightspace` | Sign into Brightspace first, then open `startUrl` |
 | `readyUrl` | Regex that matches the address once you are in and looking at assignments |
+| `hops` | Optional links to click when sign-in lands somewhere else first, e.g. Cengage's dashboard: `[{ "url": "cengage\.com/dashboard", "click": "a[href*='webassign']" }]` |
 | `steps` | Optional selectors to click after that, e.g. `["text=Assignments"]` |
 | `scope` | Optional CSS selector; only rows inside it are read, e.g. `"main"` or `"#assignments"` |
 | `ignore` | Optional regex; rows whose name matches are dropped, e.g. `"copyright|announcement"` |
