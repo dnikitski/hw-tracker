@@ -37,6 +37,8 @@ copy config.example.json config.json   # then edit it
 npm run setup                          # logins, Discord webhook, Google Calendar
 ```
 
+> If PowerShell says `npm.ps1 cannot be loaded because running scripts is disabled`, either type `npm.cmd` in place of `npm`, or allow local scripts once with `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+
 `npm run setup` asks for everything in turn. To redo one part: `npm run setup logins`, `npm run setup discord` or `npm run setup google`.
 
 ### Google Calendar
