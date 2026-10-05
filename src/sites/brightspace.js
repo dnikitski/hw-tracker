@@ -1,7 +1,12 @@
+import { mkdirSync, writeFileSync } from 'node:fs';
 import ical from 'node-ical';
 import { reach } from '../browser.js';
+import { at } from '../config.js';
 
 const DAY = 86_400_000;
+// Brightspace calendar event types that mark something opening rather than a deadline.
+const AVAILABILITY_STARTS = 2;
+const UNLOCK_STARTS = 4;
 
 // "EGR101 0005 Fall 2026 Intro to Engineering" -> "EGR 101"
 export function courseCode(text) {
@@ -86,14 +91,19 @@ async function fromApi(site, ctx) {
   const result = await get(`/d2l/api/le/${latest('le')}/calendar/events/myEvents/?${query}`);
   const events = Array.isArray(result) ? result : (result.Objects ?? result.Items ?? []);
   await page.close();
+  if (ctx.capture) {
+    mkdirSync(at('captures', 'brightspace'), { recursive: true });
+    writeFileSync(at('captures', 'brightspace', 'events.json'), JSON.stringify({ courses: [...courses], events }, null, 2));
+  }
 
   const items = [];
   for (const event of events) {
+    if (event.EventType === AVAILABILITY_STARTS || event.EventType === UNLOCK_STARTS) continue;
     const title = cleanTitle(event.Title ?? '');
     if (!title) continue;
     const due = new Date(event.EndDateTime ?? event.StartDateTime);
     if (event.IsAllDayEvent) due.setHours(23, 59, 0, 0);
-    const link = event.AssociatedEntity?.Link ?? event.CalendarEventViewUrl;
+    const link = event.AssociatedEntity?.Link || event.CalendarEventViewUrl;
     items.push({
       source: 'brightspace',
       key: String(event.CalendarEventId),
