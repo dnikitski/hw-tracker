@@ -1,0 +1,9 @@
+node_modules/
+
+# Everything below is personal: logins, session cookies, scraped pages, your course list.
+config.json
+secrets.json
+state.json
+profile/
+captures/
+logs/

@@ -1,0 +1,59 @@
+{
+  "headless": false,
+  "lookaheadDays": 120,
+  "sites": {
+    "brightspace": {
+      "type": "brightspace",
+      "enabled": true,
+      "verified": false,
+      "host": "https://brightspace.example.edu",
+      "icalUrl": ""
+    },
+    "webassign": {
+      "type": "page",
+      "enabled": true,
+      "verified": false,
+      "course": "PHYS 101",
+      "login": "cengage",
+      "startUrl": "https://www.webassign.net/wa-auth/login",
+      "readyUrl": "webassign\\.net/(web|v4cgi)/",
+      "steps": []
+    },
+    "wileyplus": {
+      "type": "page",
+      "enabled": false,
+      "verified": false,
+      "course": "MATH 201",
+      "login": "wiley",
+      "viaBrightspace": true,
+      "startUrl": "PASTE the Brightspace link that opens WileyPLUS",
+      "readyUrl": "education\\.wiley\\.com",
+      "steps": []
+    },
+    "connect": {
+      "type": "page",
+      "enabled": false,
+      "verified": false,
+      "course": "ENGR 210",
+      "login": "mcgrawhill",
+      "viaBrightspace": true,
+      "startUrl": "PASTE the Brightspace link that opens Connect",
+      "readyUrl": "connect\\.mheducation\\.com/(?!connect/login)",
+      "steps": []
+    }
+  },
+  "note": {
+    "path": "C:/Users/you/Documents/Obsidian/Homework Due.md"
+  },
+  "calendar": {
+    "enabled": true,
+    "calendarId": "primary",
+    "colorId": "5",
+    "blockMinutes": 30,
+    "reminderMinutes": [1440, 180]
+  },
+  "discord": {
+    "digestHour": 8,
+    "digestDays": 3
+  }
+}

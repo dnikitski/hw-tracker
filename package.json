@@ -1,0 +1,22 @@
+{
+  "name": "hw-tracker",
+  "version": "0.1.0",
+  "description": "Pulls homework due dates out of Brightspace, WebAssign, WileyPLUS and McGraw Hill Connect and puts them in Google Calendar, an Obsidian note and Discord.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "node src/setup.js",
+    "check": "node src/run.js --dry-run",
+    "sync": "node src/run.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "chrono-node": "^2.10.2",
+    "node-ical": "^0.27.3",
+    "playwright": "^1.63.0"
+  }
+}
