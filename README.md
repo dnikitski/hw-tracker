@@ -8,7 +8,23 @@ Homework lives in too many places: the LMS, plus a different publisher site for 
 
 It runs on a schedule on any Windows machine that stays on.
 
-> **Status:** early. Brightspace (through Microsoft sign-in), WebAssign and WileyPLUS are working against real accounts; Connect is configured but untested. Every site still has to pass your own check before it is trusted (see [Check, then trust](#check-then-trust)).
+I built it after missing four calculus assignments in one week: they were posted on a site I had no reason to open that day.
+
+## Status
+
+In daily use on my own accounts, every 4 hours.
+
+| Part | State |
+|---|---|
+| Brightspace (Microsoft sign-in, MFA remembered) | Working |
+| WebAssign (Cengage sign-in) | Working |
+| WileyPLUS (Canvas API, knows what is submitted) | Working |
+| Obsidian note | Working |
+| Discord digest and failure alerts | Working |
+| Google Calendar sync | Written, not yet run against a real calendar |
+| McGraw Hill Connect | Configured, untested |
+
+Every site has to pass your own check before it is trusted (see [Check, then trust](#check-then-trust)).
 
 ## How it works
 
@@ -30,7 +46,7 @@ Connect ─────┘   -> state.json        └─> Discord webhook
 Needs Windows and [Node.js](https://nodejs.org) 20 or newer.
 
 ```powershell
-git clone https://github.com/<you>/hw-tracker
+git clone https://github.com/3nkrypted/hw-tracker
 cd hw-tracker
 npm install
 npx playwright install chromium
