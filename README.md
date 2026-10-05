@@ -55,6 +55,18 @@ Google requires your own OAuth client; it takes about five minutes and is free.
 
 In your server: channel settings > Integrations > Webhooks > New Webhook > Copy Webhook URL, then paste it into `npm run setup discord`.
 
+### Knowing when it breaks
+
+The Discord webhook is also the alarm. No bot is needed.
+
+| What goes wrong | What you see |
+|---|---|
+| A login expires or a site changes | "hw-tracker needs attention" straight away, then once a day until fixed, then "working again" |
+| The program crashes or hangs | "hw-tracker crashed" or "hung" |
+| The computer is off or the scheduled task stopped | No morning message. The daily digest is sent even when nothing is due, so silence means it is down |
+
+For an active alert in that last case, create a free check at [healthchecks.io](https://healthchecks.io) with a period of about 6 hours, connect its Discord integration, and put its ping address in `config.json` as `"heartbeatUrl"`. Every clean run pings it; when the pings stop, it tells you.
+
 ## Check, then trust
 
 Nothing is written anywhere until you have looked at what a site returns.

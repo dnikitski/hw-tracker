@@ -3,6 +3,7 @@
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import http from 'node:http';
+import { post } from './discord.js';
 import { loadSecrets, saveSecrets } from './secrets.js';
 
 const LOGINS = {
@@ -62,7 +63,10 @@ async function logins(secrets) {
 async function discord(secrets) {
   console.log('\nDiscord. In your server: channel settings > Integrations > Webhooks > New Webhook > Copy URL.');
   const url = await ask(`Webhook URL${secrets.discordWebhook ? ' [saved, blank keeps it]' : ' (blank to skip)'}: `, { hidden: true });
-  if (url.trim()) secrets.discordWebhook = url.trim();
+  if (!url.trim()) return;
+  secrets.discordWebhook = url.trim();
+  await post(secrets.discordWebhook, '👋 hw-tracker is connected. Alerts and the daily digest will show up here.');
+  console.log('Sent a test message; check the channel.');
 }
 
 async function google(secrets) {
